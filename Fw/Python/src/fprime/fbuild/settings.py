@@ -120,11 +120,7 @@ class IniSettings:
             confparse, "fprime", "install_dest", settings_file, False
         )
 
-        if install_dest:
-            install_dest = Path(install_dest[0])
-        else:
-            install_dest = dfl_install_dest
-
+        install_dest = Path(install_dest[0]) if install_dest else dfl_install_dest
         # Read separate environment file if necessary
         env_file = IniSettings.read_safe_path(
             confparse, "fprime", "environment_file", settings_file

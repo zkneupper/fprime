@@ -101,7 +101,7 @@ class Target(ABC):
         Returns:
             string of format "mnemonic --flag1 --flag2 ..."
         """
-        flag_string = " ".join(["--{}".format(flag) for flag in flags])
+        flag_string = " ".join("--{}".format(flag) for flag in flags)
         flag_string = "" if flag_string == "" else " " + flag_string
         return "{}{}".format(mnemonic, flag_string)
 
@@ -139,10 +139,12 @@ class Target(ABC):
         Returns:
             single matching target
         """
-        matching = []
-        for target in cls.get_all_targets():
-            if target.mnemonic == mnemonic and flags == target.flags:
-                matching.append(target)
+        matching = [
+            target
+            for target in cls.get_all_targets()
+            if target.mnemonic == mnemonic and flags == target.flags
+        ]
+
         if not matching:
             raise NoSuchTargetException(
                 "Could not find target '{}'".format(cls.config_string(mnemonic, flags))

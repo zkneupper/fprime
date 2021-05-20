@@ -113,8 +113,8 @@ def generate_pymods(the_parsed_topology_xml, xml_filename, opt):
     """
     Top level python module generation method
     """
-    if the_parsed_topology_xml.get_namespace():
-        if VERBOSE:
+    if VERBOSE:
+        if the_parsed_topology_xml.get_namespace():
             print(
                 "Generating pymods for topology %s::%s"
                 % (
@@ -122,8 +122,7 @@ def generate_pymods(the_parsed_topology_xml, xml_filename, opt):
                     the_parsed_topology_xml.get_name(),
                 )
             )
-    else:
-        if VERBOSE:
+        else:
             print(
                 "Generating pymods for topology %s"
                 % (the_parsed_topology_xml.get_name())
@@ -147,13 +146,9 @@ def generate_pymods(the_parsed_topology_xml, xml_filename, opt):
     #
     # Hack to set up deployment path for instanced dictionaries (if one exists remove old one)
     #
-    if opt.dict_dir is None:
-        os.environ["DICT_DIR"] = os.getcwd()
-    else:
-        os.environ["DICT_DIR"] = opt.dict_dir
-
+    os.environ["DICT_DIR"] = os.getcwd() if opt.dict_dir is None else opt.dict_dir
     xml_list = []
-    for parsed_xml_type in parsed_xml_dict:
+    for parsed_xml_type, value in parsed_xml_dict.items():
         if parsed_xml_dict[parsed_xml_type] is None:
             print(
                 "ERROR: XML of type {} is being used, but has not been parsed correctly. Check if file exists or add xml file with the 'import_component_type' tag to the Topology file.".format(
@@ -168,7 +163,7 @@ def generate_pymods(the_parsed_topology_xml, xml_filename, opt):
                 "Generating component dicts for %s::%s"
                 % (temp_comp.get_namespace(), temp_comp.get_name())
             )
-        write_pymods_from_comp(parsed_xml_dict[parsed_xml_type], opt, topology_model)
+        write_pymods_from_comp(value, opt, topology_model)
         if VERBOSE:
             print(
                 "Generated component dicts for %s::%s"
@@ -177,8 +172,8 @@ def generate_pymods(the_parsed_topology_xml, xml_filename, opt):
 
     topology_model.set_instance_xml_list(xml_list)
 
-    if the_parsed_topology_xml.get_namespace():
-        if VERBOSE:
+    if VERBOSE:
+        if the_parsed_topology_xml.get_namespace():
             print(
                 "Generated pymods for topology %s::%s"
                 % (
@@ -186,8 +181,7 @@ def generate_pymods(the_parsed_topology_xml, xml_filename, opt):
                     the_parsed_topology_xml.get_name(),
                 )
             )
-    else:
-        if VERBOSE:
+        else:
             print(
                 "Generated pymods for topology %s"
                 % (the_parsed_topology_xml.get_name())
@@ -326,19 +320,16 @@ def main():
     #
     # Check for BUILD_ROOT variable for XML port searches
     #
-    if not opt.build_root_overwrite is None:
+    if opt.build_root_overwrite is not None:
         set_build_roots(opt.build_root_overwrite)
-        if VERBOSE:
-            print("BUILD_ROOT set to %s" % ",".join(get_build_roots()))
     else:
         if ("BUILD_ROOT" in os.environ.keys()) == False:
             print("ERROR: Build root not set to root build path...")
             sys.exit(-1)
         set_build_roots(os.environ["BUILD_ROOT"])
-        if VERBOSE:
-            print("BUILD_ROOT set to %s" % ",".join(get_build_roots()))
-
-    if not "Ai" in xml_filename:
+    if VERBOSE:
+        print("BUILD_ROOT set to %s" % ",".join(get_build_roots()))
+    if "Ai" not in xml_filename:
         print("ERROR: Missing Ai at end of file name...")
         raise OSError
     #
@@ -348,7 +339,7 @@ def main():
     xml_type = XmlParser.XmlParser(xml_filename)()
 
     # Only Topologies can be inputted
-    if xml_type == "assembly" or xml_type == "deployment":
+    if xml_type in ["assembly", "deployment"]:
         if VERBOSE:
             print("Detected Topology XML so Generating Topology C++ Files...")
         the_parsed_topology_xml = XmlTopologyParser.XmlTopologyParser(xml_filename)

@@ -142,10 +142,7 @@ class PortHVisitor(AbstractVisitor.AbstractVisitor):
 
             #
             # Make size for pointer modifier here...
-            if arg.get_modifier() == "pointer":
-                cl = " *)"
-            else:
-                cl = ")"
+            cl = " *)" if arg.get_modifier() == "pointer" else ")"
             #
             if isinstance(t, tuple):
                 if t[0][0].upper() == "ENUM":
@@ -188,7 +185,7 @@ class PortHVisitor(AbstractVisitor.AbstractVisitor):
         """
         Return a list of port argument tuples
         """
-        arg_list = list()
+        arg_list = []
 
         for arg in obj.get_args():
             n = arg.get_name()

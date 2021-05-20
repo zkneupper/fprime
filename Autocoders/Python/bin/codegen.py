@@ -406,47 +406,47 @@ def generate_topology(the_parsed_topology_xml, xml_filename, opt):
 
         topology_model.set_instance_xml_list(xml_list)
 
-        if opt.xml_topology_dict:
-            topology_dict = etree.Element("dictionary")
-            topology_dict.attrib["topology"] = the_parsed_topology_xml.get_name()
+    if opt.xml_topology_dict:
+        topology_dict = etree.Element("dictionary")
+        topology_dict.attrib["topology"] = the_parsed_topology_xml.get_name()
 
-            top_dict_gen = TopDictGenerator.TopDictGenerator(parsed_xml_dict, PRINT.debug)
-            for comp in the_parsed_topology_xml.get_instances():
-                comp_type = comp.get_type()
-                comp_name = comp.get_name()
-                comp_id = int(comp.get_base_id())
-                PRINT.debug(
-                    "Processing {} [{}] ({})".format(comp_name, comp_type, hex(comp_id))
-                )
-
-                top_dict_gen.set_current_comp(comp)
-
-                top_dict_gen.check_for_enum_xml()
-                top_dict_gen.check_for_serial_xml()
-                top_dict_gen.check_for_commands()
-                top_dict_gen.check_for_channels()
-                top_dict_gen.check_for_events()
-                top_dict_gen.check_for_parameters()
-                top_dict_gen.check_for_arrays()
-
-            top_dict_gen.remove_duplicate_enums()
-
-            topology_dict.append(top_dict_gen.get_enum_list())
-            topology_dict.append(top_dict_gen.get_serializable_list())
-            topology_dict.append(top_dict_gen.get_array_list())
-            topology_dict.append(top_dict_gen.get_command_list())
-            topology_dict.append(top_dict_gen.get_event_list())
-            topology_dict.append(top_dict_gen.get_telemetry_list())
-            topology_dict.append(top_dict_gen.get_parameter_list())
-
-            fileName = the_parsed_topology_xml.get_xml_filename().replace(
-                "Ai.xml", "Dictionary.xml"
+        top_dict_gen = TopDictGenerator.TopDictGenerator(parsed_xml_dict, PRINT.debug)
+        for comp in the_parsed_topology_xml.get_instances():
+            comp_type = comp.get_type()
+            comp_name = comp.get_name()
+            comp_id = int(comp.get_base_id())
+            PRINT.debug(
+                "Processing {} [{}] ({})".format(comp_name, comp_type, hex(comp_id))
             )
-            PRINT.info("Generating XML dictionary %s" % fileName)
-            fd = open(
-                fileName, "wb"
-            )  # Note: binary forces the same encoding of the source files
-            fd.write(etree.tostring(topology_dict, pretty_print=True))
+
+            top_dict_gen.set_current_comp(comp)
+
+            top_dict_gen.check_for_enum_xml()
+            top_dict_gen.check_for_serial_xml()
+            top_dict_gen.check_for_commands()
+            top_dict_gen.check_for_channels()
+            top_dict_gen.check_for_events()
+            top_dict_gen.check_for_parameters()
+            top_dict_gen.check_for_arrays()
+
+        top_dict_gen.remove_duplicate_enums()
+
+        topology_dict.append(top_dict_gen.get_enum_list())
+        topology_dict.append(top_dict_gen.get_serializable_list())
+        topology_dict.append(top_dict_gen.get_array_list())
+        topology_dict.append(top_dict_gen.get_command_list())
+        topology_dict.append(top_dict_gen.get_event_list())
+        topology_dict.append(top_dict_gen.get_telemetry_list())
+        topology_dict.append(top_dict_gen.get_parameter_list())
+
+        fileName = the_parsed_topology_xml.get_xml_filename().replace(
+            "Ai.xml", "Dictionary.xml"
+        )
+        PRINT.info("Generating XML dictionary %s" % fileName)
+        fd = open(
+            fileName, "wb"
+        )  # Note: binary forces the same encoding of the source files
+        fd.write(etree.tostring(topology_dict, pretty_print=True))
 
     initFiles = generator.create("initFiles")
     # startSource = generator.create("startSource")
@@ -598,9 +598,9 @@ def generate_component(
 
         for port in the_parsed_component_xml.get_ports():
             if port.get_direction() == "input":
-                num_input_ports = num_input_ports + int(port.get_max_number())
+                num_input_ports += int(port.get_max_number())
             if port.get_direction() == "output":
-                num_output_ports = num_output_ports + int(port.get_max_number())
+                num_output_ports += int(port.get_max_number())
         if len(the_parsed_component_xml.get_ports()):
             if num_input_ports:
                 report_file.write("Input Ports: %d\n" % num_input_ports)
@@ -1216,20 +1216,17 @@ def main():
 
     # Configure the logging.
     log_level = opt.logger.upper()
-    log_level_dict = dict()
+    log_level_dict = {
+        "QUIET": None,
+        "DEBUG": logging.DEBUG,
+        "INFO": logging.INFO,
+        "WARNING": logging.WARN,
+        "ERROR": logging.ERROR,
+        "CRITICAL": logging.CRITICAL,
+    }
 
-    log_level_dict["QUIET"] = None
-    log_level_dict["DEBUG"] = logging.DEBUG
-    log_level_dict["INFO"] = logging.INFO
-    log_level_dict["WARNING"] = logging.WARN
-    log_level_dict["ERROR"] = logging.ERROR
-    log_level_dict["CRITICAL"] = logging.CRITICAL
 
-    if log_level_dict[log_level] is None:
-        stdout_enable = False
-    else:
-        stdout_enable = True
-
+    stdout_enable = log_level_dict[log_level] is not None
     log_fd = opt.logger_output
     # For now no log file
 
@@ -1279,7 +1276,7 @@ def main():
             the_serial_xml = XmlSerializeParser.XmlSerializeParser(xml_filename)
             generate_serializable(the_serial_xml, opt)
             dependency_parser = the_serial_xml
-        elif xml_type == "assembly" or xml_type == "deployment":
+        elif xml_type in ["assembly", "deployment"]:
             DEBUG.info("Detected Topology XML so Generating Topology C++ Files...")
             the_parsed_topology_xml = XmlTopologyParser.XmlTopologyParser(xml_filename)
             DEPLOYMENT = the_parsed_topology_xml.get_deployment()
@@ -1312,20 +1309,19 @@ def main():
             PRINT.info("Invalid XML found...this format not supported")
             ERROR = True
 
-        if opt.dependency_file is not None:
-            if opt.build_root_flag:
-                generate_dependency_file(
-                    opt.dependency_file,
-                    os.path.basename(xml_filename),
-                    list(get_build_roots())[0],
-                    dependency_parser,
-                    xml_type,
-                )
+        if opt.dependency_file is not None and opt.build_root_flag:
+            generate_dependency_file(
+                opt.dependency_file,
+                os.path.basename(xml_filename),
+                list(get_build_roots())[0],
+                dependency_parser,
+                xml_type,
+            )
 
     # Always return to directory where we started.
     os.chdir(starting_directory)
 
-    if ERROR == True:
+    if ERROR:
         sys.exit(-1)
     else:
         sys.exit(0)

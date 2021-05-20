@@ -29,22 +29,21 @@ VERSION = Version()
 
 def format_type_item(typeItem):
     typeIsTuple = str(type(typeItem)) == "<type 'tuple'>"
-    if typeIsTuple:
-        description = typeItem[0]
-        values = typeItem[1]
-        valuesArr = []
-        for value in values:
-            valuesArr.append({"name": value[0], "value": value[1], "comment": value[2]})
+    if not typeIsTuple:
+        return typeItem
 
-        typeObj = {
+    description = typeItem[0]
+    values = typeItem[1]
+    valuesArr = [
+        {"name": value[0], "value": value[1], "comment": value[2]}
+        for value in values
+    ]
+
+    return {
             "type": description[0],
             "name": description[1],
             "values": valuesArr,
         }
-    else:
-        typeObj = typeItem
-
-    return typeObj
 
 
 def pinit():

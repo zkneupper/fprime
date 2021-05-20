@@ -24,10 +24,10 @@ def open_file(name, type):
     """
     Open the file for writing
     """
-    #
-    gse_serializable_install_dir = "DefaultDict" + os.sep + "serializable"
     if type == "py":
         filename = name + ".py"
+        #
+        gse_serializable_install_dir = "DefaultDict" + os.sep + "serializable"
         #
         # Put Gse serializable is correct place for make system
         #
@@ -36,9 +36,7 @@ def open_file(name, type):
         os.chdir(gse_serializable_install_dir)
     else:
         filename = name + "ArrayAc." + type
-    #
-    fp = open(filename, "w")
-    return fp
+    return open(filename, "w")
 
 
 def write_template(
@@ -87,99 +85,87 @@ def generate_array(xml_file):
     generate nothing.
     """
     xml = XmlParser.XmlParser(xml_file)
-    if xml() == "array":
-        #
-        # Parse array xml here
-        #
-        array_xml = XmlArrayParser.XmlArrayParser(xml_file)
-        name = array_xml.get_name()
-        namespace = array_xml.get_namespace()
-        arr_type = array_xml.get_type()
-        arr_typeinfo = array_xml.get_typeinfo()
-        arr_size = int(array_xml.get_size())
-        format_string = array_xml.get_format()
-        default_values = array_xml.get_default()
-        type_id = array_xml.get_type_id()
-        string_size = array_xml.get_string_size()
-        if string_size:
-            string_size = int(string_size)
-        comment = array_xml.get_comment()
-        include_headers = array_xml.get_include_header_files()
-        import_serializables = array_xml.get_includes()
-        import_enums = array_xml.get_include_enum_files()
-        import_arrays = array_xml.get_include_array_files()
-        include_path = array_xml.get_include_path()
+    if xml() != "array":
+        return False
+
+    #
+    # Parse array xml here
+    #
+    array_xml = XmlArrayParser.XmlArrayParser(xml_file)
+    name = array_xml.get_name()
+    namespace = array_xml.get_namespace()
+    arr_type = array_xml.get_type()
+    arr_typeinfo = array_xml.get_typeinfo()
+    arr_size = int(array_xml.get_size())
+    format_string = array_xml.get_format()
+    default_values = array_xml.get_default()
+    type_id = array_xml.get_type_id()
+    string_size = array_xml.get_string_size()
+    if string_size:
+        string_size = int(string_size)
+    comment = array_xml.get_comment()
+    include_headers = array_xml.get_include_header_files()
+    import_serializables = array_xml.get_includes()
+    import_enums = array_xml.get_include_enum_files()
+    import_arrays = array_xml.get_include_array_files()
+    include_path = array_xml.get_include_path()
 
         # Set up imports
-        headers = []
-        for h in include_headers:
-            headers.append(h.replace("Ai.xml", "Ac.hpp"))
-
-        serials = []
-        for s in import_serializables:
-            serials.append(s.replace("Ai.xml", "Ac.hpp"))
-
-        enums = []
-        for e in import_enums:
-            enums.append(e.replace("Ai.xml", "Ac.hpp"))
-
-        arrays = []
-        for a in import_arrays:
-            arrays.append(a.replace("Ai.xml", "Ac.hpp"))
-
-        #
-        # Generate the hpp file
-        #
-        fp = open_file(name, "hpp")
-        c = array_hpp.array_hpp()
-        write_template(
-            fp,
-            c,
-            name,
-            namespace,
-            arr_type,
-            arr_typeinfo,
-            arr_size,
-            format_string,
-            default_values,
-            type_id,
-            string_size,
-            include_path,
-            comment,
-            headers,
-            serials,
-            enums,
-            arrays,
-        )
-        fp.close()
-        #
-        # Generate the cpp file
-        #
-        fp = open_file(name, "cpp")
-        c = array_cpp.array_cpp()
-        write_template(
-            fp,
-            c,
-            name,
-            namespace,
-            arr_type,
-            arr_typeinfo,
-            arr_size,
-            format_string,
-            default_values,
-            type_id,
-            string_size,
-            include_path,
-            comment,
-            headers,
-            serials,
-            enums,
-            arrays,
-        )
-        fp.close()
-        return True
-    else:
-        return False
+    headers = [h.replace("Ai.xml", "Ac.hpp") for h in include_headers]
+    serials = [s.replace("Ai.xml", "Ac.hpp") for s in import_serializables]
+    enums = [e.replace("Ai.xml", "Ac.hpp") for e in import_enums]
+    arrays = [a.replace("Ai.xml", "Ac.hpp") for a in import_arrays]
+    #
+    # Generate the hpp file
+    #
+    fp = open_file(name, "hpp")
+    c = array_hpp.array_hpp()
+    write_template(
+        fp,
+        c,
+        name,
+        namespace,
+        arr_type,
+        arr_typeinfo,
+        arr_size,
+        format_string,
+        default_values,
+        type_id,
+        string_size,
+        include_path,
+        comment,
+        headers,
+        serials,
+        enums,
+        arrays,
+    )
+    fp.close()
+    #
+    # Generate the cpp file
+    #
+    fp = open_file(name, "cpp")
+    c = array_cpp.array_cpp()
+    write_template(
+        fp,
+        c,
+        name,
+        namespace,
+        arr_type,
+        arr_typeinfo,
+        arr_size,
+        format_string,
+        default_values,
+        type_id,
+        string_size,
+        include_path,
+        comment,
+        headers,
+        serials,
+        enums,
+        arrays,
+    )
+    fp.close()
+    return True
 
 
 if __name__ == "__main__":

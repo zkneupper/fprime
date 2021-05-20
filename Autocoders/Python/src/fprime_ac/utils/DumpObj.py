@@ -265,7 +265,7 @@ def prettyPrintCols(strings, widths, split=" "):
     format = "".join(["%%-%ds" % width for width in widths[0:-1]]) + "%s"
 
     def formatline(*cols):
-        return format % tuple([(s or "") for s in cols])
+        return format % tuple((s or "") for s in cols)
 
     # generate the formatted text
     return "\n".join(map(formatline, *cols))
@@ -284,7 +284,7 @@ def prettyPrint(string, maxlen=75, split=" "):
     lines = []
     oldeol = 0
     eol = 0
-    while not (eol == -1 or eol == len(string) - 1):
+    while not eol in [-1, len(string) - 1]:
         eol = string.rfind(split, oldeol, oldeol + maxlen + len(split))
         lines.append(string[oldeol:eol])
         oldeol = eol + len(split)
@@ -302,7 +302,7 @@ def nukenewlines(string):
     if not string:
         return ""
     lines = string.splitlines()
-    return " ".join([line.strip() for line in lines])
+    return " ".join(line.strip() for line in lines)
 
 
 def delchars(str, chars):
@@ -311,6 +311,6 @@ def delchars(str, chars):
 
     # Translate demands a mapping string of 256 characters;
     # whip up a string that will leave all characters unmolested.
-    identity = "".join([chr(x) for x in range(256)])
+    identity = "".join(chr(x) for x in range(256))
 
     return str.translate(identity, chars)

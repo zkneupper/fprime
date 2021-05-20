@@ -53,7 +53,7 @@ class CompFactory:
         """
         self.__parsed = None
         self.__instance = None
-        self.__configured_visitors = dict()
+        self.__configured_visitors = {}
 
     def getInstance():
         """
@@ -116,7 +116,7 @@ class CompFactory:
             d = port_obj.get_direction()
             s = port_obj.get_sync()
             r = port_obj.get_role()
-            if s == "sync" or s == "guarded":
+            if s in ["sync", "guarded"]:
                 num_sync_ports += 1
             if s == "async":
                 num_async_ports += 1
@@ -136,7 +136,7 @@ class CompFactory:
             f = command_obj.get_full()
             if s == "guarded":
                 has_guarded_ports = True
-            if s == "sync" or s == "guarded":
+            if s in ["sync", "guarded"]:
                 num_sync_ports += 1
             if s == "async":
                 num_async_ports += 1
@@ -376,25 +376,28 @@ class CompFactory:
 
         # check some component/port rules
         # 1) Active or queued need at least one async port/command
-        if (comp_kind == "active") or (comp_kind == "queued"):
-            if num_async_ports == 0 and len(parameter_obj_list) == 0:
-                PRINT.info(
-                    'ERROR: %s: Active/Queued component "%s" needs at least one async port, command, or interface'
-                    % (the_parsed_component_xml.get_xml_filename(), comp_name)
-                )
-                sys.exit(-1)
+        if (
+            comp_kind in ["active", "queued"]
+            and num_async_ports == 0
+            and not parameter_obj_list
+        ):
+            PRINT.info(
+                'ERROR: %s: Active/Queued component "%s" needs at least one async port, command, or interface'
+                % (the_parsed_component_xml.get_xml_filename(), comp_name)
+            )
+            sys.exit(-1)
         # 2) Queued component needs at least one sync port/command
-        if comp_kind == "queued":
-            if num_sync_ports == 0:
-                PRINT.info(
-                    'ERROR: %s: Queued component "%s" needs at least one sync/guarded port or command'
-                    % (the_parsed_component_xml.get_xml_filename(), comp_name)
-                )
-                sys.exit(-1)
+        if comp_kind == "queued" and num_sync_ports == 0:
+            PRINT.info(
+                'ERROR: %s: Queued component "%s" needs at least one sync/guarded port or command'
+                % (the_parsed_component_xml.get_xml_filename(), comp_name)
+            )
+            sys.exit(-1)
 
-        parsed_array_list = []
-        for array_file in the_parsed_component_xml.get_array_type_files():
-            parsed_array_list.append(array_file.replace("Ai.xml", "Ac.hpp"))
+        parsed_array_list = [
+            array_file.replace("Ai.xml", "Ac.hpp")
+            for array_file in the_parsed_component_xml.get_array_type_files()
+        ]
 
         #
         # Instance the component here...

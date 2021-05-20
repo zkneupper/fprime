@@ -89,16 +89,17 @@ class TopDictGenerator:
                         self.__enum_list.append(enum_elem)
                     else:
                         type_name = member_type
-                        if member_type == "string":
+                        if type_name == "string":
                             member_elem.attrib["len"] = member_size
                     member_elem.attrib["type"] = type_name
                     members_elem.append(member_elem)
                 serializable_elem.append(members_elem)
 
-                dup = False
-                for ser in self.__serializable_list:
-                    if ser.attrib["type"] == serializable_elem.attrib["type"]:
-                        dup = True
+                dup = any(
+                    ser.attrib["type"] == serializable_elem.attrib["type"]
+                    for ser in self.__serializable_list
+                )
+
                 if not dup:
                     self.__serializable_list.append(serializable_elem)
 
@@ -126,7 +127,7 @@ class TopDictGenerator:
                     enum_value = int(member_value)
 
                 enum_mem.attrib["value"] = "%d" % enum_value
-                enum_value = enum_value + 1
+                enum_value += 1
                 if member_comment is not None:
                     enum_mem.attrib["description"] = member_comment
                 enum_elem.append(enum_mem)
@@ -162,7 +163,7 @@ class TopDictGenerator:
                         self.__enum_list.append(enum_elem)
                     else:
                         type_name = arg_type
-                        if arg_type == "string":
+                        if type_name == "string":
                             arg_elem.attrib["len"] = arg.get_size()
                     arg_elem.attrib["type"] = type_name
                     args_elem.append(arg_elem)
@@ -205,7 +206,7 @@ class TopDictGenerator:
                     self.__enum_list.append(enum_elem)
                 else:
                     type_name = channel_type
-                    if channel_type == "string":
+                    if type_name == "string":
                         channel_elem.attrib["len"] = chan.get_size()
                 (lr, lo, ly, hy, ho, hr) = chan.get_limits()
                 if lr is not None:
@@ -242,8 +243,7 @@ class TopDictGenerator:
                         "comment"
                     ]
                 args_elem = etree.Element("args")
-                arg_num = 0
-                for arg in event.get_args():
+                for arg_num, arg in enumerate(event.get_args()):
                     arg_elem = etree.Element("arg")
                     arg_elem.attrib["name"] = arg.get_name()
                     arg_type = arg.get_type()
@@ -261,11 +261,10 @@ class TopDictGenerator:
                         )
                     else:
                         type_name = arg_type
-                        if arg_type == "string":
+                        if type_name == "string":
                             arg_elem.attrib["len"] = arg.get_size()
                     arg_elem.attrib["type"] = type_name
                     args_elem.append(arg_elem)
-                    arg_num += 1
                 event_elem.attrib["format_string"] = format_string
                 event_elem.append(args_elem)
                 self.__event_list.append(event_elem)
@@ -284,7 +283,7 @@ class TopDictGenerator:
                 enum_value = int(value)
 
             enum_mem.attrib["value"] = "%d" % enum_value
-            enum_value = enum_value + 1
+            enum_value += 1
             if comment is not None:
                 enum_mem.attrib["description"] = comment
             enum_elem.append(enum_mem)
@@ -336,7 +335,7 @@ class TopDictGenerator:
                             enum_value = int(value)
 
                         enum_mem.attrib["value"] = "%d" % enum_value
-                        enum_value = enum_value + 1
+                        enum_value += 1
                         if comment is not None:
                             enum_mem.attrib["description"] = comment
                         enum_elem.append(enum_mem)
@@ -346,7 +345,7 @@ class TopDictGenerator:
                     self.__enum_list.append(enum_elem)
                 else:
                     type_name = arg_type
-                    if arg_type == "string":
+                    if type_name == "string":
                         arg_elem.attrib["len"] = parameter.get_size()
                     else:
                         param_default = "0"
@@ -419,17 +418,16 @@ class TopDictGenerator:
 
                 array_elem.append(members_elem)
 
-                dup = False
-                for arr in self.__array_list:
-                    if arr.attrib["name"] == array_elem.attrib["name"]:
-                        dup = True
+                dup = any(
+                    arr.attrib["name"] == array_elem.attrib["name"]
+                    for arr in self.__array_list
+                )
+
                 if not dup:
                     self.__array_list.append(array_elem)
 
     def remove_duplicate_enums(self):
-        temp_enum_list = []
-        for enum_elem in self.__enum_list:
-            temp_enum_list.append(enum_elem)
+        temp_enum_list = [enum_elem for enum_elem in self.__enum_list]
         for enum_elem in temp_enum_list:
             should_remove = False
             for temp_enum in self.__enum_list:
@@ -441,7 +439,7 @@ class TopDictGenerator:
                 if temp_enum.attrib["type"] == enum_elem.attrib["type"]:
                     should_remove = True
                 if (
-                    not len(temp_enum.getchildren()) == len(enum_elem.getchildren())
+                    len(temp_enum.getchildren()) != len(enum_elem.getchildren())
                     and should_remove
                 ):
                     should_remove = False
@@ -451,7 +449,8 @@ class TopDictGenerator:
                     i = 0
                     while i < len(children1) and i < len(children2):
                         if (
-                            not children1[i].attrib["name"] == children2[i].attrib["name"]
+                            children1[i].attrib["name"]
+                            != children2[i].attrib["name"]
                             and should_remove
                         ):
                             should_remove = False

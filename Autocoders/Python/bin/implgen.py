@@ -153,11 +153,11 @@ def parse_component(the_parsed_component_xml, xml_filename, opt):
         del xml_parser_obj
 
     model = CompFactory.CompFactory.getInstance()
-    component_model = model.create(
-        the_parsed_component_xml, parsed_port_xml_list, parsed_serializable_xml_list
+    return model.create(
+        the_parsed_component_xml,
+        parsed_port_xml_list,
+        parsed_serializable_xml_list,
     )
-
-    return component_model
 
 
 def generate_impl_files(opt, component_model):
@@ -228,22 +228,19 @@ def main():
     #
     # Check for BUILD_ROOT variable for XML port searches
     #
-    if not opt.build_root_overwrite is None:
+    if opt.build_root_overwrite is not None:
         set_build_roots(opt.build_root_overwrite)
-        if VERBOSE:
-            print("BUILD_ROOT set to %s" % ",".join(get_build_roots()))
     else:
         if ("BUILD_ROOT" in os.environ.keys()) == False:
             print("ERROR: Build root not set to root build path...")
             sys.exit(-1)
         set_build_roots(os.environ["BUILD_ROOT"])
-        if VERBOSE:
-            print("BUILD_ROOT set to %s" % ",".join(get_build_roots()))
-
+    if VERBOSE:
+        print("BUILD_ROOT set to %s" % ",".join(get_build_roots()))
     #
     # Write test component
     #
-    if not "Ai" in xml_filename:
+    if "Ai" not in xml_filename:
         print("ERROR: Missing Ai at end of file name...")
         raise OSError
     #

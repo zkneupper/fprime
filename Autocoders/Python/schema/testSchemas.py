@@ -156,10 +156,8 @@ class schema_test:
 
         if not xml_parsed:
             self.__validate_file(test_set[1], "XML")
-            xml_file_handler = open(test_set[1])
-            xml_parsed = etree.parse(xml_file_handler)
-            xml_file_handler.close()
-
+            with open(test_set[1]) as xml_file_handler:
+                xml_parsed = etree.parse(xml_file_handler)
         if test_set[2]:
             with pytest.raises(test_set[2]) as excinfo:
                 self.__compiled.assertValid(xml_parsed)

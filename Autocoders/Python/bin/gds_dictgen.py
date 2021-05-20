@@ -115,7 +115,7 @@ def generate_xml_dict(the_parsed_topology_xml, xml_filename, opt):
 
     #
     xml_list = []
-    for parsed_xml_type in parsed_xml_dict:
+    for parsed_xml_type, value in parsed_xml_dict.items():
         if parsed_xml_dict[parsed_xml_type] is None:
             print(
                 "ERROR: XML of type {} is being used, but has not been parsed correctly. Check if file exists or add xml file with the 'import_component_type' tag to the Topology file.".format(
@@ -123,7 +123,7 @@ def generate_xml_dict(the_parsed_topology_xml, xml_filename, opt):
                 )
             )
             raise Exception()
-        xml_list.append(parsed_xml_dict[parsed_xml_type])
+        xml_list.append(value)
 
     topology_model.set_instance_xml_list(xml_list)
 
@@ -198,25 +198,22 @@ def main():
     #
     # Check for BUILD_ROOT variable for XML port searches
     #
-    if not opt.build_root_overwrite is None:
+    if opt.build_root_overwrite is not None:
         set_build_roots(opt.build_root_overwrite)
-        if VERBOSE:
-            print("BUILD_ROOT set to %s" % ",".join(get_build_roots()))
     else:
         if ("BUILD_ROOT" in os.environ.keys()) == False:
             print("ERROR: Build root not set to root build path...")
             sys.exit(-1)
         set_build_roots(os.environ["BUILD_ROOT"])
-        if VERBOSE:
-            print("BUILD_ROOT set to %s" % ",".join(get_build_roots()))
-
-    if not "Ai" in xml_filename:
+    if VERBOSE:
+        print("BUILD_ROOT set to %s" % ",".join(get_build_roots()))
+    if "Ai" not in xml_filename:
         print("ERROR: Missing Ai at end of file name...")
         raise OSError
 
     xml_type = XmlParser.XmlParser(xml_filename)()
 
-    if xml_type == "assembly" or xml_type == "deployment":
+    if xml_type in ["assembly", "deployment"]:
         if VERBOSE:
             print("Detected Topology XML so Generating Topology C++ Files...")
         the_parsed_topology_xml = XmlTopologyParser.XmlTopologyParser(xml_filename)

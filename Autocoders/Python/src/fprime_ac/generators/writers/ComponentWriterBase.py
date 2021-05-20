@@ -157,10 +157,7 @@ class ComponentWriterBase(AbstractWriter.AbstractWriter):
             return "/* " + comment + "*/"
 
     def emitIndent(self, indent):
-        str = ""
-        for i in range(0, indent):
-            str += " "
-        return str
+        return "".join(" " for _ in range(indent))
 
     def emitNonPortParamsCpp(self, indent, params):
         """
@@ -192,12 +189,13 @@ class ComponentWriterBase(AbstractWriter.AbstractWriter):
         length = len(params)
         if length == 0:
             return self.emitIndent(indent) + "void"
-        else:
-            str = ""
-            for i in range(0, length - 1):
-                str += self.emitParam(NOT_LAST, indent, paramStrs, params[i])
-            str += self.emitParam(LAST, indent, paramStrs, params[length - 1])
-            return str
+        str = "".join(
+            self.emitParam(NOT_LAST, indent, paramStrs, params[i])
+            for i in range(length - 1)
+        )
+
+        str += self.emitParam(LAST, indent, paramStrs, params[length - 1])
+        return str
 
     def emitPortParamsCpp(self, indent, params):
         """
@@ -218,8 +216,7 @@ class ComponentWriterBase(AbstractWriter.AbstractWriter):
 
         def f(args):
             def g(lst):
-                name = lst[0]
-                return name
+                return lst[0]
 
             return self.argsString(list(map(g, args)))
 
@@ -392,13 +389,11 @@ class ComponentWriterBase(AbstractWriter.AbstractWriter):
             if self.isAsync(sync):
                 if len(opcodes) == 1:
                     return "CMD_" + mnemonic.upper()
-                else:
-                    mlist = list()
-                    inst = 0
-                    for opcode in opcodes:
-                        mlist.append("CMD_" + mnemonic.upper() + "_%d" % inst)
-                        inst += 1
-                    return mlist
+                return [
+                    "CMD_" + mnemonic.upper() + "_%d" % inst
+                    for inst, opcode in enumerate(opcodes)
+                ]
+
             else:
                 return None
 
@@ -450,7 +445,7 @@ class ComponentWriterBase(AbstractWriter.AbstractWriter):
         c.has_time_get = "TimeGet" in roles
 
     def initPortIncludes(self, obj, c):
-        c.port_includes = list()
+        c.port_includes = []
         for include in self.__model_parser.uniqueList(obj.get_xml_port_files()):
             include = include.replace("PortAi.xml", "PortAc.hpp")
             include = include.replace("/test/ut", "")
@@ -709,21 +704,21 @@ class ComponentWriterBase(AbstractWriter.AbstractWriter):
         for name, type, direction, role in c.ports:
             if role == "Cmd":
                 c.Cmd_Name = name
-            if role == "CmdRegistration":
+            elif role == "CmdRegistration":
                 c.CmdReg_Name = name
-            if role == "CmdResponse":
+            elif role == "CmdResponse":
                 c.CmdStatus_Name = name
-            if role == "LogEvent":
+            elif role == "LogEvent":
                 c.LogEvent_Name = name
-            if role == "LogTextEvent":
+            elif role == "LogTextEvent":
                 c.LogTextEvent_Name = name
-            if role == "ParamGet":
+            elif role == "ParamGet":
                 c.ParamGet_Name = name
-            if role == "ParamSet":
+            elif role == "ParamSet":
                 c.ParamSet_Name = name
-            if role == "Telemetry":
+            elif role == "Telemetry":
                 c.Tlm_Name = name
-            if role == "TimeGet":
+            elif role == "TimeGet":
                 c.Time_Name = name
 
     def initPortParams(self, obj, c):
@@ -809,7 +804,7 @@ class ComponentWriterBase(AbstractWriter.AbstractWriter):
         ]
 
         for p in obj.get_ports():
-            type_includes = type_includes + p.get_includes()
+            type_includes += p.get_includes()
         c.types_includes = self.__model_parser.uniqueList(type_includes)
         c.c_includes = obj.get_c_header_files()
         if False in [x[-3:] == "hpp" or x[-1:] == "h" for x in c.c_includes]:
@@ -856,10 +851,7 @@ class ComponentWriterBase(AbstractWriter.AbstractWriter):
             y = f(x)
             if y is not None:
                 # check if list
-                if isinstance(y, list):
-                    result += y
-                else:
-                    result += [y]
+                result += y if isinstance(y, list) else [y]
         return result
 
     def namespaceWrite(self, obj):

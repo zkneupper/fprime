@@ -18,7 +18,7 @@ class EnumCheckResults:
         #    (overrun_type, bit_length, max_value, signed)
 
         self.overrun_details = list()
-        self.underrun_details = list()
+        self.underrun_details = []
 
         self.overruns = 0  # not enough uplink bits (error)
         self.underruns = 0  # too many uplink bits (warning)
@@ -44,16 +44,10 @@ class EnumCheckResults:
         self.stale_bools = self.stale_bools + 1
 
     def has_warnings(self):
-        if self.underruns > 0 or self.stale_bools > 0:
-            return True
-        else:
-            return False
+        return self.underruns > 0 or self.stale_bools > 0
 
     def has_errors(self):
-        if self.overruns > 0 or self.key_errors > 0:
-            return True
-        else:
-            return False
+        return self.overruns > 0 or self.key_errors > 0
 
     def report_warnings(self):
         print("Enum Check Warnings: (%d)" % (self.underruns + self.stale_bools))

@@ -299,8 +299,8 @@ def print_info(parsed, deployment):
 
     # Artifact locations come afterwards
     print("  ----------------------------------------------------------")
+    format_string = "    {} build cache: {}"
     for build_type, build_artifact_location in build_infos.items():
-        format_string = "    {} build cache: {}"
         print(
             format_string.format(
                 build_type.get_cmake_build_type(), build_artifact_location

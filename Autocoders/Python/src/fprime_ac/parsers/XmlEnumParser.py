@@ -173,7 +173,7 @@ class XmlEnumParser:
                     has_value += 1
 
         is_consistent = True
-        if not (has_value == 0 or has_value == total):
+        if not has_value in [0, total]:
             is_consistent = False
 
         return is_consistent
@@ -181,7 +181,7 @@ class XmlEnumParser:
     def get_max_value(self):
         # Assumes that items have already been checked for consistency,
         # self.__items stores a list of tuples with index 1 being the value
-        if not self.__items[0][1] == "":
+        if self.__items[0][1] != "":
             max_value = self.__items[0][1]
 
             for item in self.__items:
