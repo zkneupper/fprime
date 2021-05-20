@@ -77,7 +77,7 @@ class ArrayType(ValueType):
         """
         JSONable type
         """
-        members = {
+        return {
             "name": self.__typename,
             "type": self.__typename,
             "size": self.__arr_size,
@@ -86,7 +86,6 @@ class ArrayType(ValueType):
             if self.__val is None
             else [member.to_jsonable() for member in self.__val],
         }
-        return members
 
     def serialize(self):
         """ Serialize the array by serializing the elements one by one """

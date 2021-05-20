@@ -133,7 +133,7 @@ class PortCppVisitor(AbstractVisitor.AbstractVisitor):
         """
         Return a list of port argument tuples
         """
-        arg_list = list()
+        arg_list = []
 
         for arg in obj.get_args():
             n = arg.get_name()
@@ -330,10 +330,7 @@ class PortCppVisitor(AbstractVisitor.AbstractVisitor):
         c.args_string = self._get_args_string(obj)
         #
         c.ret_flag = obj.get_return()
-        if c.ret_flag is not None:
-            c.ret_flag = True
-        else:
-            c.ret_flag = False
+        c.ret_flag = c.ret_flag is not None
         #
         self._writeTmpl(c, "privateVisit")
 

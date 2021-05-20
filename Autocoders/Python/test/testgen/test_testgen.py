@@ -102,7 +102,7 @@ def file_diff(file1, file2):
                 line2 = file2open.readline()
                 if not line1 or not line2:
                     break
-                elif not line1 == line2:
+                elif line1 != line2:
                     diff_lines.add(count)
                 count += 1
 

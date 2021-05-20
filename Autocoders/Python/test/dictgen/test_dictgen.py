@@ -36,7 +36,7 @@ def file_diff(file1, file2):
                 line2 = file2open.readline()
                 if not line1 or not line2:
                     break
-                elif not line1 == line2:
+                elif line1 != line2:
                     diff_lines.add(count)
                 count += 1
 
@@ -114,12 +114,7 @@ def filter_non_src_files(files):
     Filters out all files which don't contain prefix Inst
     i.e. all files that aren't pymod dicts for TestComponent
     """
-    src_files = []
-    for file in files:
-        if file[:4] == "Inst":
-            src_files.append(file)
-
-    return src_files
+    return [file for file in files if file[:4] == "Inst"]
 
 
 def get_serializables_from_comp_xml(comp_xml):
@@ -219,27 +214,35 @@ def find_enum_from_dict(opened_dict, enum_list, type):
             for child in channel.getchildren():
                 if child.tag == "args":
                     for arg in child.getchildren():
-                        if "type" in arg.attrib:
-                            if arg.attrib["type"] == "ENUM":
-                                enum_list[type].append(arg.getchildren()[0])
+                        if (
+                            "type" in arg.attrib
+                            and arg.attrib["type"] == "ENUM"
+                        ):
+                            enum_list[type].append(arg.getchildren()[0])
     elif opened_dict.tag == "events":
         for event in opened_dict.getchildren():
             for child in event.getchildren():
                 if child.tag == "args":
                     for arg in child.getchildren():
-                        if "type" in arg.attrib:
-                            if arg.attrib["type"] == "ENUM":
-                                enum_list[type].append(arg.getchildren()[0])
+                        if (
+                            "type" in arg.attrib
+                            and arg.attrib["type"] == "ENUM"
+                        ):
+                            enum_list[type].append(arg.getchildren()[0])
     elif opened_dict.tag == "telemetry":
         for channel in opened_dict.getchildren():
-            if "data_type" in channel.attrib:
-                if channel.attrib["data_type"] == "ENUM":
-                    enum_list[type].append(channel.getchildren()[0])
+            if (
+                "data_type" in channel.attrib
+                and channel.attrib["data_type"] == "ENUM"
+            ):
+                enum_list[type].append(channel.getchildren()[0])
     elif opened_dict.tag == "parameters":
         for param in opened_dict.getchildren():
-            if "data_type" in param.attrib:
-                if param.attrib["data_type"] == "ENUM":
-                    enum_list[type].append(param.get_children()[0])
+            if (
+                "data_type" in param.attrib
+                and param.attrib["data_type"] == "ENUM"
+            ):
+                enum_list[type].append(param.get_children()[0])
 
 
 def check_generated_files(testdir):

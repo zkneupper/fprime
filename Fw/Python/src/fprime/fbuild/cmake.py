@@ -306,12 +306,11 @@ class CMakeHandler:
         make_target_names = [
             line.replace("...", "").strip() for line in stdout if line.startswith("...")
         ]
-        contextual_make_targets = [
+        return [
             make.replace(prefix, "").strip("_")
             for make in make_target_names
             if make.startswith(prefix)
         ]
-        return contextual_make_targets
 
     @staticmethod
     def purge(build_dir):

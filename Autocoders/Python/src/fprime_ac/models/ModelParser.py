@@ -155,7 +155,7 @@ class ModelParser:
         Return a dict of return type strings, keyed by port name.
         If no return type it is 'void '.   Append modifiers to return types.
         """
-        ret_dict = dict()
+        ret_dict = {}
         for port in obj.get_ports():
             name = port.get_name()
             ret_tuple = port.get_return()
@@ -184,12 +184,12 @@ class ModelParser:
         Return a dict of list of args, keyed by port name
         (e.g. arg_dict['Port name'] => [(name,type,comment), (name,type,comment), ...]
         """
-        args_dict = dict()
+        args_dict = {}
         comp_namespace = obj.get_namespace()
         for port in obj.get_ports():
             name = port.get_name()
             port_namespace = port.get_namespace()
-            args_dict[name] = list()
+            args_dict[name] = []
             # print "Port: %s" % name
             args = port.get_args()
             for a in args:
@@ -239,10 +239,10 @@ class ModelParser:
         (.e.g. arg_dict['Port name'] => "type1 name1, type2, name2 ..."
         """
         d = self.getPortArgsDict(obj)
-        d2 = dict()
+        d2 = {}
         for l in d:
             if len(d[l]) > 0:
-                d2[l] = ", ".join(["{} {}{}".format(x[1], x[3], x[0]) for x in d[l]])
+                d2[l] = ", ".join("{} {}{}".format(x[1], x[3], x[0]) for x in d[l])
             else:
                 d2[l] = "void"
         return d2
@@ -253,20 +253,17 @@ class ModelParser:
         (.e.g. arg_dict['Port name'] => "name1, name2 ..."
         """
         d = self.getPortArgsDict(obj)
-        d2 = dict()
-        for l in d:
-            if len(d[l]) > 0:
-                d2[l] = ", ".join(["%s" % x[0] for x in d[l]])
-            else:
-                d2[l] = ""
-        return d2
+        return {
+            l: ", ".join("%s" % x[0] for x in d[l]) if len(d[l]) > 0 else ""
+            for l in d
+        }
 
     def getMsgTypeArgsDict(self, obj, msg_types_list):
         """
         Return a dict of list of args, keyed by port type name (in all CAPS)
         (e.g. msg_type_arg_dict['Msg type name'] => [(name,type,comment),(name,type,comment),...]
         """
-        msg_type_arg_dict = dict()
+        msg_type_arg_dict = {}
         port_instance_name_list = self.getPortsList(obj)
         args_dict = self.getPortArgsDict(obj)
         #
@@ -281,12 +278,10 @@ class ModelParser:
         Return a dict of port namespace, keyed on port type.
         """
         # Build list of unique port types here...
-        port_types = []
-        for p in obj.get_ports():
-            port_types.append(p.get_type())
+        port_types = [p.get_type() for p in obj.get_ports()]
         port_types = self.uniqueList(port_types)
         # Build a dictionary of namespaces keyed on port type here...
-        port_namespace_dict = dict()
+        port_namespace_dict = {}
         for p in port_types:
             for p2 in obj.get_ports():
                 if p == p2.get_type():
@@ -355,14 +350,8 @@ class ModelParser:
                     mem_list = t[1]
                     member_lines = []
                     for member in mem_list:
-                        if member[1] is not None:
-                            mem_init = " = %s" % member[1]
-                        else:
-                            mem_init = ""
-                        if member[2] is not None:
-                            mem_comment = " //<! %s" % member[2]
-                        else:
-                            mem_comment = ""
+                        mem_init = " = %s" % member[1] if member[1] is not None else ""
+                        mem_comment = " //<! %s" % member[2] if member[2] is not None else ""
                         member_lines.append((member[0], mem_init, mem_comment))
                     enum_list.append((enum_type, member_lines))
                 else:
@@ -405,14 +394,8 @@ class ModelParser:
                     mem_list = t[1]
                     member_lines = []
                     for member in mem_list:
-                        if member[1] is not None:
-                            mem_init = " = %s" % member[1]
-                        else:
-                            mem_init = ""
-                        if member[2] is not None:
-                            mem_comment = " //<! %s" % member[2]
-                        else:
-                            mem_comment = ""
+                        mem_init = " = %s" % member[1] if member[1] is not None else ""
+                        mem_comment = " //<! %s" % member[2] if member[2] is not None else ""
                         member_lines.append((member[0], mem_init, mem_comment))
                     enum_list.append((enum_type, member_lines))
                 else:
@@ -459,14 +442,8 @@ class ModelParser:
                         mem_list = t[1]
                         member_lines = []
                         for member in mem_list:
-                            if member[1] is not None:
-                                mem_init = " = %s" % member[1]
-                            else:
-                                mem_init = ""
-                            if member[2] is not None:
-                                mem_comment = " //<! %s" % member[2]
-                            else:
-                                mem_comment = ""
+                            mem_init = " = %s" % member[1] if member[1] is not None else ""
+                            mem_comment = " //<! %s" % member[2] if member[2] is not None else ""
                             member_lines.append((member[0], mem_init, mem_comment))
                         enum_list.append((enum_type, member_lines))
                     else:
@@ -479,10 +456,10 @@ class ModelParser:
         Return a dict of list of args, keyed by command mnemonic
         (e.g. arg_dict['mnemonic'] => [(name,type,comment), (name,type,comment), ...]
         """
-        args_dict = dict()
+        args_dict = {}
         for command in obj.get_commands():
             mnemonic = command.get_mnemonic()
-            args_dict[mnemonic] = list()
+            args_dict[mnemonic] = []
             # print "Command: %s" % name
             args = command.get_args()
 
@@ -500,10 +477,7 @@ class ModelParser:
                         print("ERROR: Expected ENUM type in command args list...")
                         sys.exit(-1)
                 elif t == "string":
-                    if from_proto:
-                        t = "const Fw::CmdStringArg&"
-                    else:
-                        t = "Fw::CmdStringArg"
+                    t = "const Fw::CmdStringArg&" if from_proto else "Fw::CmdStringArg"
                     typeinfo = "string"
                 c = a.get_comment()
                 # Add namespace to type here...
@@ -523,10 +497,10 @@ class ModelParser:
         (.e.g. arg_dict['mnemonic'] => "type1 name1, type2, name2 ..."
         """
         d = self.getCommandArgsDict(obj, True)
-        d2 = dict()
+        d2 = {}
         for l in d:
             if len(d[l]) > 0:
-                d2[l] = ", ".join(["{} {}".format(x[1], x[0]) for x in d[l]])
+                d2[l] = ", ".join("{} {}".format(x[1], x[0]) for x in d[l])
             else:
                 d2[l] = "void"
         return d2
@@ -545,14 +519,8 @@ class ModelParser:
                         mem_list = t[1]
                         member_lines = []
                         for member in mem_list:
-                            if member[1] is not None:
-                                mem_init = " = %s" % member[1]
-                            else:
-                                mem_init = ""
-                            if member[2] is not None:
-                                mem_comment = " //<! %s" % member[2]
-                            else:
-                                mem_comment = ""
+                            mem_init = " = %s" % member[1] if member[1] is not None else ""
+                            mem_comment = " //<! %s" % member[2] if member[2] is not None else ""
                             member_lines.append((member[0], mem_init, mem_comment))
                         enum_list.append((enum_type, member_lines))
                     else:
@@ -565,10 +533,10 @@ class ModelParser:
         Return a dict of list of args, keyed by name mnemonic
         (e.g. arg_dict['name'] => [(name,type,comment), (name,type,comment), ...]
         """
-        args_dict = dict()
+        args_dict = {}
         for event in obj.get_events():
             name = event.get_name()
-            args_dict[name] = list()
+            args_dict[name] = []
             # print "Command: %s" % name
             args = event.get_args()
 
@@ -609,10 +577,10 @@ class ModelParser:
         (.e.g. arg_dict['mnemonic'] => "type1 name1, type2, name2 ..."
         """
         d = self.getEventArgsDict(obj)
-        d2 = dict()
+        d2 = {}
         for l in d:
             if len(d[l]) > 0:
-                d2[l] = ", ".join(["{} {}".format(x[1], x[0]) for x in d[l]])
+                d2[l] = ", ".join("{} {}".format(x[1], x[0]) for x in d[l])
             else:
                 d2[l] = "void"
         return d2
@@ -635,10 +603,10 @@ class ModelParser:
         (.e.g. arg_dict['name'] => "type1 name1, type2, name2 ..."
         """
         d = self.getInternalInterfaceArgsDict(obj, True)
-        d2 = dict()
+        d2 = {}
         for l in d:
             if len(d[l]) > 0:
-                d2[l] = ", ".join(["{} {}".format(x[1], x[0]) for x in d[l]])
+                d2[l] = ", ".join("{} {}".format(x[1], x[0]) for x in d[l])
             else:
                 d2[l] = "void"
         return d2
@@ -648,10 +616,10 @@ class ModelParser:
         Return a dict of list of args, keyed by internal interface name
         (e.g. arg_dict['name'] => [(name,type,comment), (name,type,comment), ...]
         """
-        args_dict = dict()
+        args_dict = {}
         for internal_interface in obj.get_internal_interfaces():
             name = internal_interface.get_name()
-            args_dict[name] = list()
+            args_dict[name] = []
             # print "Interface: %s" % name
             args = internal_interface.get_args()
 
@@ -676,9 +644,7 @@ class ModelParser:
                     else:
                         t = "Fw::InternalInterfaceString"
                     typeinfo = "string"
-                elif t in TypesList.types_list + TypesList.port_types_list:
-                    pass
-                else:
+                elif t not in TypesList.types_list + TypesList.port_types_list:
                     if from_proto:
                         t = "%s&" % t
                     typeinfo = "user"
@@ -700,14 +666,8 @@ class ModelParser:
                         mem_list = t[1]
                         member_lines = []
                         for member in mem_list:
-                            if member[1] is not None:
-                                mem_init = " = %s" % member[1]
-                            else:
-                                mem_init = ""
-                            if member[2] is not None:
-                                mem_comment = " //<! %s" % member[2]
-                            else:
-                                mem_comment = ""
+                            mem_init = " = %s" % member[1] if member[1] is not None else ""
+                            mem_comment = " //<! %s" % member[2] if member[2] is not None else ""
                             member_lines.append((member[0], mem_init, mem_comment))
                         enum_list.append((enum_type, member_lines))
                     else:

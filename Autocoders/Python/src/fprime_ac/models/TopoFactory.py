@@ -457,17 +457,17 @@ class TopoFactory:
         without_ID_obj = None
         while True:
             if (
-                len(initial_comp_with_ID) == 0
-                and len(initial_comp_without_ID) == 0
+                not initial_comp_with_ID
+                and not initial_comp_without_ID
                 and not with_ID_obj
                 and not without_ID_obj
             ):
                 break
 
-            if len(initial_comp_with_ID) > 0 and with_ID_obj is None:
+            if initial_comp_with_ID and with_ID_obj is None:
                 with_ID_obj = initial_comp_with_ID.pop(0)
 
-            if len(initial_comp_without_ID) > 0 and without_ID_obj is None:
+            if initial_comp_without_ID and without_ID_obj is None:
                 without_ID_obj = initial_comp_without_ID.pop(0)
 
             next_poss_id = (
@@ -518,10 +518,8 @@ class TopoFactory:
 
             save_log_file_path = csv_removed_from_path_name + "_IDTableLog.txt"
 
-            save_log_file = open(save_log_file_path, "w")
-            save_log_file.write(save_buffer)
-            save_log_file.close()
-
+            with open(save_log_file_path, "w") as save_log_file:
+                save_log_file.write(save_buffer)
         return out_base_ids_list
 
     def __print_base_id_table_comments(self, save_buffer):

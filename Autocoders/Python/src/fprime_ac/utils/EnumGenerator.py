@@ -56,33 +56,33 @@ def generate_enum(xml_file):
     generate nothing.
     """
     xml = XmlParser.XmlParser(xml_file)
-    if xml() == "enum":
-        #
-        # Parse enum xml here
-        #
-        enum_xml = XmlEnumParser.XmlEnumParser(xml_file)
-        name = enum_xml.get_name()
-        namespace = enum_xml.get_namespace()
-        items = enum_xml.get_items()
-        max_value = enum_xml.get_max_value()
-        comment = enum_xml.get_comment()
-        #
-        # Generate the hpp file
-        #
-        fp = open_file(name, "hpp")
-        c = enum_hpp.enum_hpp()
-        write_template(fp, c, name, namespace, items, max_value, comment)
-        fp.close()
-        #
-        # Generate the cpp file
-        #
-        fp = open_file(name, "cpp")
-        c = enum_cpp.enum_cpp()
-        write_template(fp, c, name, namespace, items, max_value, comment)
-        fp.close()
-        return True
-    else:
+    if xml() != "enum":
         return False
+
+    #
+    # Parse enum xml here
+    #
+    enum_xml = XmlEnumParser.XmlEnumParser(xml_file)
+    name = enum_xml.get_name()
+    namespace = enum_xml.get_namespace()
+    items = enum_xml.get_items()
+    max_value = enum_xml.get_max_value()
+    comment = enum_xml.get_comment()
+    #
+    # Generate the hpp file
+    #
+    fp = open_file(name, "hpp")
+    c = enum_hpp.enum_hpp()
+    write_template(fp, c, name, namespace, items, max_value, comment)
+    fp.close()
+    #
+    # Generate the cpp file
+    #
+    fp = open_file(name, "cpp")
+    c = enum_cpp.enum_cpp()
+    write_template(fp, c, name, namespace, items, max_value, comment)
+    fp.close()
+    return True
 
 
 if __name__ == "__main__":

@@ -59,14 +59,11 @@ class Parser:
         a big string.
         """
 
-        self.__node_stack = list()
-        self.__node_end_visit_dict = dict()
+        self.__node_stack = []
+        self.__node_end_visit_dict = {}
         self.__node_start_visit_dict = dict()
 
-        if xml_file is None:
-            self.__xml_string = None
-        else:
-            self.__xml_string = self._make_string(xml_file)
+        self.__xml_string = None if xml_file is None else self._make_string(xml_file)
 
     def _make_string(self, filename):
         """
@@ -156,7 +153,7 @@ class Parser:
         if self.__xml_string is None:
             return
         else:
-            self.__node_stack = list()
+            self.__node_stack = []
 
         for token, content, loc in XML(self.__xml_string):
 
@@ -196,18 +193,19 @@ class Parser:
 
         for token, content, loc in XML(xml_text):
 
-            if token == "START":
-
+            if token == "END":
                 name = content[0]
-                attr = content[1]
+                self._endElement(name)
 
+            elif token == "START":
+                name = content[0]
                 # We are building a tree of Element objects. The issue with
                 # parsing multiple files is that each XML file needs a common
                 # root Element to form the top of the tree. Therefore, the
                 # requirement for parsing a second file is that it has a same
                 # named root Element.
 
-                if self.__root is not None and root_name_checked == False:
+                if self.__root is not None and not root_name_checked:
 
                     if self.__root.getName() == name:
 
@@ -235,16 +233,14 @@ class Parser:
                         return
 
                 else:
+                    attr = content[1]
+
                     self._startElement(name, attr)
 
                 root_name_checked = True
 
             elif token == "TEXT":
                 self._cData(content)
-
-            elif token == "END":
-                name = content[0]
-                self._endElement(name)
 
         return self.__root
 
@@ -310,14 +306,11 @@ class Parser:
         """
 
         problems = 0
-        value = dict()
-        invalidAttrs = list()
+        invalidAttrs = []
 
         errorMsg = "Error: XML element <%s> is invalid" % (element.getName())
 
-        for attrName in validAttrs:
-            value[attrName] = None
-
+        value = {attrName: None for attrName in validAttrs}
         for attrName in list(element.getAttr().keys()):
             attrValue = element.getAttr(attrName)
             if attrName in validAttrs:
@@ -358,8 +351,8 @@ class Parser:
         detailed validation performed by the caller (the subclass' element validation
         methods).
         """
-        found = dict()
-        unexpectedChildren = list()
+        found = {}
+        unexpectedChildren = []
         errMsg = "Error: The XML element <%s> is invalid" % (element.getName())
 
         children = element.getElements()
@@ -434,10 +427,7 @@ class Element:
         # The element's tag name
         self.name = name
         # The element's attribute dictionary
-        if len(attributes) > 0:
-            attr = dict(attributes)
-        else:
-            attr = dict()
+        attr = dict(attributes) if len(attributes) > 0 else dict()
         self.attribute = attr
         # The element's cdata
         self.cdata = ""
@@ -481,12 +471,7 @@ class Element:
 
         if not name:
             return self.children
-        else:
-            elements = list()
-            for element in self.children:
-                if element.name == name:
-                    elements.append(element)
-            return elements
+        return [element for element in self.children if element.name == name]
 
     def __getitem__(self, item):
         """
@@ -494,16 +479,15 @@ class Element:
         look like dictionary calls.
         """
         if item == "attr":
-            e = self.getAttr()
+            return self.getAttr()
         elif item == "cdata":
-            e = self.getData()
+            return self.getData()
         elif item == "element":
-            e = self.getName()
+            return self.getName()
         elif item == "child":
-            e = self.getElements()
+            return self.getElements()
         else:
-            e = self.getElements(item)
-        return e
+            return self.getElements(item)
 
 
 def node_visit(element):

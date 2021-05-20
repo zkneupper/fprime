@@ -110,15 +110,11 @@ class SerialCppVisitor(AbstractVisitor.AbstractVisitor):
         args = obj.get_members()
         arg_str = ""
         for arg in args:
+            arg_str += prefix + "%s" % arg[0]
             if arg[2] is not None and arg[1] != "string":
-                arg_str += prefix + "%s" % arg[0]
                 arg_str += ", "
                 arg_str += "%s" % arg[2]
-                arg_str += ", "
-            else:
-                arg_str += prefix + "%s" % arg[0]
-                arg_str += ", "
-
+            arg_str += ", "
         arg_str = arg_str.strip(", ")
         return arg_str
 
@@ -126,7 +122,7 @@ class SerialCppVisitor(AbstractVisitor.AbstractVisitor):
         """
         Return a list of struct member tuples
         """
-        arg_list = list()
+        arg_list = []
 
         for (name, mtype, size, format, comment) in obj.get_members():
             typeinfo = None

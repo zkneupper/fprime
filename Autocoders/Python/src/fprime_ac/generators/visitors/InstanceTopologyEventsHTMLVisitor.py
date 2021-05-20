@@ -163,8 +163,7 @@ class InstanceTopologyEventsHTMLVisitor(AbstractVisitor.AbstractVisitor):
 
         def f(args):
             def g(lst):
-                name = lst[0]
-                return name
+                return lst[0]
 
             return self.argsString(list(map(g, args)))
 

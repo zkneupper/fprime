@@ -64,11 +64,8 @@ def ParseNumDefine(defname, filename, loadfile=True):
         if not os.path.isfile(filename):
             raise OSError("%r: file not found." % filename)
 
-        fd = open(filename)
-
-        data = fd.read()
-        fd.close()
-
+        with open(filename) as fd:
+            data = fd.read()
     else:
         # The file is already in memory. We just need to get
         # reference where we need it. No loading needed.
@@ -156,11 +153,8 @@ def ParseTypedefEnum(typename, filename, loadfile=True):
                 print(str)
                 raise OSError(str)
 
-        fd = open(filename)
-
-        data = fd.read()
-        fd.close()
-
+        with open(filename) as fd:
+            data = fd.read()
     else:
         # The file is already in memory.  We just need to get
         # reference where we need it. No loading required.
@@ -246,7 +240,7 @@ def ParseTypedefEnum(typename, filename, loadfile=True):
     # more than the last value -- just like C. All default values will
     # start at 0.
 
-    if len(toks) == 0:
+    if not toks:
         str = "ERROR: could not find ENUM ({}) in {}".format(typename, filename)
         print(str)
         raise ValueError(str)
@@ -262,9 +256,9 @@ def ParseTypedefEnum(typename, filename, loadfile=True):
     # are interested in debugging, such as 'MrfType'
     debugOnType = "no_debugging_desired_here_sir_carry_on"
 
-    for i in range(len(toks)):
+    for tok in toks:
 
-        t = toks[i]
+        t = tok
 
         if typename == debugOnType:
             print(typename + "(0):")

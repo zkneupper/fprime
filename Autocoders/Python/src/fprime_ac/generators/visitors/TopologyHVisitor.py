@@ -175,10 +175,7 @@ class TopologyHVisitor(AbstractVisitor.AbstractVisitor):
             #
             # Added configurable override for includes for testing
             if self.__config.get("includes", "comp_include_path") == "None":
-                if relative_path is not None:
-                    path = relative_path
-                else:
-                    path = component.get_namespace()
+                path = component.get_namespace() if relative_path is None else relative_path
             else:
                 path = self.__config.get("includes", "comp_include_path")
             c.path = path
@@ -210,13 +207,13 @@ class TopologyHVisitor(AbstractVisitor.AbstractVisitor):
 
         c.component_import_list = []
         for xml_name in obj.get_instance_header_dict():
-            if obj.get_instance_header_dict()[xml_name] is not None:
-                xml_path = obj.get_instance_header_dict()[xml_name]
-            else:
+            if obj.get_instance_header_dict()[xml_name] is None:
                 xml_path = xml_name
                 xml_path = xml_path.strip()
                 xml_path = xml_path.replace("i.xml", "")
                 xml_path += "c.hpp"
+            else:
+                xml_path = obj.get_instance_header_dict()[xml_name]
             c.component_import_list.append(xml_path)
 
         c.component_declarations = []

@@ -109,7 +109,7 @@ class SerialHVisitor(AbstractVisitor.AbstractVisitor):
         """
         Return a list of port argument tuples
         """
-        arg_list = list()
+        arg_list = []
 
         for (name, mtype, size, format, comment) in obj.get_members():
             typeinfo = None

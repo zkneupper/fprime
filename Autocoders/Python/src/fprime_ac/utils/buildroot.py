@@ -80,8 +80,7 @@ def search_for_file(file_type, file_path):
     @return: full path of file
     """
     try:
-        checker = locate_build_root(file_path)
-        return checker
+        return locate_build_root(file_path)
     except BuildRootMissingException:
         print(
             "ERROR: {} xml specification file {} does not exist!".format(
